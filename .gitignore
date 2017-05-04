@@ -1,0 +1,6 @@
+*.xml
+*.iml
+javase/out
+javase/lib
+javase/.idea
+javase/out
