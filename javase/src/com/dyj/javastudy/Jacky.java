@@ -8,7 +8,7 @@ public class Jacky implements Student {
     public void resolveQuestion(Callback callback) {
 
         try {
-            Thread.sleep(3000);
+            Thread.sleep(4000);
         } catch (InterruptedException e) {
 
         }
