@@ -1,4 +1,5 @@
 *.xml
+*.jar
 *.iml
 javase/out
 javase/lib

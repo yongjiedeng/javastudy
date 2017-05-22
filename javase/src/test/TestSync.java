@@ -5,12 +5,13 @@ package test;
  */
 public class TestSync {
     public static void main(String[] args){
-        Producer producer = new Producer();
-        Consumer consumer = new Consumer();
+        StackBag stackBag = new StackBag();
+        Producer producer = new Producer(stackBag);
+        Consumer consumer = new Consumer(stackBag);
         Thread thread1 = new Thread(producer);
         Thread thread2 = new Thread(consumer);
-        thread1.run();
-        thread2.run();
+        thread1.start();
+        thread2.start();
     }
 
 
@@ -22,48 +23,79 @@ class WoTou{
     public WoTou(int i){
         this.i = i;
     }
+
+    @Override
+    public String toString() {
+        return "WoTou:"+i;
+    }
 }
 
 class StackBag{
     WoTou[] woTouArr = new WoTou[10];
-    static int index =0;
-    public synchronized void push(WoTou woTou){
-        while (index <10){
-            index ++;
-            woTouArr[index] = woTou;
+    int index =0;
+    public synchronized void push(WoTou woTou) throws InterruptedException {
+        if(index == woTouArr.length){
+            this.wait();
         }
+        this.notify();
+        woTouArr[index] = woTou;
+        index ++;
     }
 
     public synchronized  WoTou popo(){
-        while (index > 0){
-            index --;
-            return woTouArr[index];
+        if(index < 0){
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        return null;
+        //this.notify();
+        index --;
+        return woTouArr[index];
+
     }
 }
 
 class Producer implements Runnable{
-    StackBag stackBag;
+    private StackBag stackBag;
+
+    public Producer(StackBag stackBag){
+        this.stackBag = stackBag;
+    }
 
     @Override
     public void run() {
         for(int i=0;i<10; i++){
             WoTou woTou = new WoTou(i);
-            stackBag.push(woTou);
-            System.out.println("Product Wotuo "+ woTou);
+            try {
+                stackBag.push(woTou);
+                System.out.println("Product Wotuo "+ woTou);
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
 
 class Consumer implements Runnable{
-    StackBag stackBag;
+    private StackBag stackBag;
+
+    public Consumer(StackBag stackBag){
+        this.stackBag = stackBag;
+    }
 
     @Override
     public void run() {
         for(int i=0;i<10; i++){
             WoTou woTou = stackBag.popo();
-            System.out.println("Product Wotuo "+ woTou);
+            System.out.println("Consum Wotuo "+ woTou);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
